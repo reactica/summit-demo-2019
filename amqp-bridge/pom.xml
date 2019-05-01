@@ -34,11 +34,6 @@
             <artifactId>vertx-rx-java2</artifactId>
             <version>3.7.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>RELEASE</version>
-        </dependency>
     </dependencies>
 
 </project>

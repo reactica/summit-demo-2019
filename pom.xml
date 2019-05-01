@@ -13,9 +13,10 @@
 
   <modules>
     <module>domain-model</module>
+    <module>amqp-bridge</module>
     <module>queue-line-service</module>
     <module>event-generator</module>
-      <module>amqp-bridge</module>
+    <module>event-store</module>
   </modules>
 
 

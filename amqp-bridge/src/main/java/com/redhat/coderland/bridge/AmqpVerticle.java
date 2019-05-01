@@ -3,16 +3,17 @@ package com.redhat.coderland.bridge;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.parsetools.JsonParser;
 import io.vertx.ext.amqp.*;
 import io.vertx.reactivex.core.AbstractVerticle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
 public class AmqpVerticle extends AbstractVerticle {
 
-    private static final Logger LOGGER = LogManager.getLogger("AMQP Verticle");
+    private static final Logger LOGGER = LoggerFactory.getLogger("AMQP Verticle");
 
     @Override
     public void start(Future<Void> completion) {
@@ -29,10 +30,10 @@ public class AmqpVerticle extends AbstractVerticle {
         Future<AmqpConnection> future = Future.future();
         amqpClient.connect(connection  -> {
             if (connection.succeeded()) {
-                LOGGER.info("Connected to the AMQP broker {}", configuration.getHost());
+                LOGGER.info(String.format("Connected to the AMQP broker {%s}", configuration.getHost()));
                 future.complete(connection.result());
             } else {
-                LOGGER.info("Unable to connect to AMQP broker {}", configuration.getHost(), connection.cause());
+                LOGGER.info(String.format("Unable to connect to AMQP broker {%d}", configuration.getHost(), connection.cause()));
                 future.fail(connection.cause());
             }
         });
@@ -40,7 +41,7 @@ public class AmqpVerticle extends AbstractVerticle {
                 .compose(connection -> {
                     LOGGER.info("Weaving event bus to AMQP connections");
                     configuration.getEventBusToAmqp().forEach(bridge -> {
-                        LOGGER.info("Event Bus {} => AMQP {}", bridge.getAddress(), bridge.getQueue());
+                        LOGGER.info(String.format("Event Bus {%s} => AMQP {%s}", bridge.getAddress(), bridge.getQueue()));
                         connection.createSender(bridge.getQueue(),done -> {
                             if (done.failed()) {
                                 LOGGER.error("Unable to create a sender");
@@ -51,7 +52,7 @@ public class AmqpVerticle extends AbstractVerticle {
                                     msg.headers().names().forEach(key -> properties.put(key,msg.headers().get(key)));
                                     AmqpMessage message = AmqpMessage.create()
                                             .address(bridge.getQueue())
-                                            .withBody(msg.body().encode())
+                                            .withJsonObjectAsBody(msg.body())
                                             .applicationProperties(properties)
                                             .build();
                                     sender.send(message);
@@ -66,20 +67,26 @@ public class AmqpVerticle extends AbstractVerticle {
                     // Start consumers to send AMQP messages to the event bus (AMQP -> Event Bus
                     List<AmqpToEventBus> bridges = configuration.getAmqpToEventBus();
                     bridges.forEach(bridge -> {
-                        LOGGER.info("AMQP {} => Event Bus {}", bridge.getQueue(), bridge.getAddress());
+                        LOGGER.info(String.format("AMQP {%s} => Event Bus {%s}", bridge.getQueue(), bridge.getAddress()));
                         connection.createReceiver(bridge.getQueue(), done -> {
                             if (done.failed()) {
-                                LOGGER.error("Unable to create a reciever");
+                                LOGGER.error("Unable to create a receiver");
                             } else {
                                 AmqpReceiver receiver = done.result();
                                 receiver.handler(message -> {
+                                    LOGGER.info(String.format(">>> RECEIVED MESSAGE on %s", bridge.getQueue()));
                                     JsonObject properties = message.applicationProperties();
+                                    LOGGER.debug(String.format(">>> MESSAGE PROPERTIES are %s", properties.encodePrettily()));
                                     JsonObject body = message.bodyAsJsonObject();
+                                    LOGGER.debug(String.format(">>> MESSAGE is %s", body.encodePrettily()));
+
                                     DeliveryOptions deliveryOptions = new DeliveryOptions();
                                     properties.stream().forEach(entry -> deliveryOptions.addHeader(entry.getKey(),entry.getValue().toString()));
                                     if (bridge.isPublish()) {
+                                        LOGGER.info(String.format(">>> PUBLISHING MESSAGE on %s", bridge.getQueue()));
                                         vertx.eventBus().publish(bridge.getAddress(), body, deliveryOptions);
                                     } else {
+                                        LOGGER.info(String.format(">>> SENDING MESSAGE on %s", bridge.getQueue()));
                                         vertx.eventBus().send(bridge.getAddress(), body, deliveryOptions);
                                     }
                                 });
