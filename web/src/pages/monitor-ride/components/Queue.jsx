@@ -3,6 +3,29 @@ import {HashRouter} from "react-router-dom";
 import Websocket from 'react-websocket';
 
 
+// class UserItem extends React.Component {
+//
+//   shouldComponentUpdate(nextProps, nextState, nextContext) {
+//     return this.props.user.currentState != nextProps.user.currentState;
+//   }
+//
+//   render() {
+//     return (
+//         <tr key={this.props.user.id.toString()}>
+//           <td>{ this.props.user.name }</td>
+//           <td>{ this.props.user.rideId }</td>
+//           <td>{ this.props.user.currentState }</td>
+//           <td>{ this.props.user.enterQueueTime }</td>
+//         </tr>
+//     );
+//   }
+// }
+//
+// class UserList extends React.Component {
+//
+//
+// }
+
 class Queue extends React.Component {
 
   constructor(props) {
@@ -54,12 +77,12 @@ class Queue extends React.Component {
 
   renderRow(user) {
     return (
-        <tr key={user.id.toString()}>
+        <tr key={ user.id.toString()}>
           <td>{ user.name }</td>
           <td>{ user.rideId }</td>
           <td>{ user.currentState }</td>
           <td>{ user.enterQueueTime }</td>
-        </tr>
+          </tr>
     );
   }
 

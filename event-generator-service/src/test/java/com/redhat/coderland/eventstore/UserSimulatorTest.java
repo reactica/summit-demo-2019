@@ -50,7 +50,7 @@ public class UserSimulatorTest {
         USER_EVENTS.clear();
 
         LOGGER.info("TEST > Registering the EventBus consumer");
-        vertx.eventBus().<JsonObject>consumer("from-user-in-line",message -> {
+        vertx.eventBus().<JsonObject>localConsumer("test",message -> {
             JsonObject userEventJson = message.body();
             assertNotNull(userEventJson);
 
@@ -64,7 +64,6 @@ public class UserSimulatorTest {
         });
 
 
-
         Event event = USER_EVENTS.poll(3, TimeUnit.SECONDS);
         assertNotNull(event);
 
@@ -73,7 +72,7 @@ public class UserSimulatorTest {
 
     private Completable deployAMQPVerticle() {
         AmqpToEventBus user_queue = new AmqpToEventBus();
-        user_queue.setAddress("from-user-in-line");
+        user_queue.setAddress("test");
         user_queue.setQueue(Event.USER_IN_LINE);
 
         AmqpConfiguration configuration = new AmqpConfiguration()

@@ -33,7 +33,7 @@ public class AmqpVerticle extends AbstractVerticle {
                 LOGGER.info(String.format("Connected to the AMQP broker {%s}", configuration.getHost()));
                 future.complete(connection.result());
             } else {
-                LOGGER.info(String.format("Unable to connect to AMQP broker {%d}", configuration.getHost(), connection.cause()));
+                LOGGER.info(String.format("Unable to connect to AMQP broker {%s}", configuration.getHost(), connection.cause()));
                 future.fail(connection.cause());
             }
         });
@@ -51,7 +51,7 @@ public class AmqpVerticle extends AbstractVerticle {
                                     JsonObject properties = new JsonObject();
                                     msg.headers().names().forEach(key -> properties.put(key,msg.headers().get(key)));
                                     AmqpMessage message = AmqpMessage.create()
-                                            .address(bridge.getQueue())
+                                            .durable(true)
                                             .withJsonObjectAsBody(msg.body())
                                             .applicationProperties(properties)
                                             .build();
@@ -68,7 +68,7 @@ public class AmqpVerticle extends AbstractVerticle {
                     List<AmqpToEventBus> bridges = configuration.getAmqpToEventBus();
                     bridges.forEach(bridge -> {
                         LOGGER.info(String.format("AMQP {%s} => Event Bus {%s}", bridge.getQueue(), bridge.getAddress()));
-                        connection.createReceiver(bridge.getQueue(), done -> {
+                        connection.createReceiver(bridge.getQueue(), new AmqpReceiverOptions().setDurable(true), done -> {
                             if (done.failed()) {
                                 LOGGER.error("Unable to create a receiver");
                             } else {

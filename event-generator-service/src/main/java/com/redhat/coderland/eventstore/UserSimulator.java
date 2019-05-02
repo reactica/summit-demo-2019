@@ -67,7 +67,7 @@ public class UserSimulator {
 
     private Future<Void> bridgeStarted;
 
-    @Scheduled(every = "2s")
+    @Scheduled(every = "{coderland.generateevent.newuserintervall}")
     public void genereteNewUsers() {
         if(bridgeStarted.failed()) {
             LOGGER.error("Failed to start bridge with cause: " + bridgeStarted.cause());
@@ -78,7 +78,7 @@ public class UserSimulator {
         }
     }
 
-    @Scheduled(every = "5s", delay=2, delayUnit = TimeUnit.SECONDS)
+    @Scheduled(every = "{coderland.generateevent.rollercoaster.ride.intervall}", delay=2, delayUnit = TimeUnit.SECONDS)
     public void putRollerCoasterUsersOnRide() {
         if(bridgeStarted.failed()) {
             LOGGER.error("Failed to start bridge with cause: " + bridgeStarted.cause());

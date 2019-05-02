@@ -11,6 +11,7 @@ import io.reactivex.Single;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.CompletableHelper;
 import io.vertx.reactivex.core.Vertx;
 import org.infinispan.client.hotrod.RemoteCache;
 import org.junit.jupiter.api.Assertions;
@@ -19,6 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
 public class EventReceiverTest {
@@ -48,8 +52,7 @@ public class EventReceiverTest {
         deployAMQPVerticle()
                 .andThen(sendMessage(message))
                 .andThen(checkMessage(message))
-                .subscribe(() -> System.out.println("OK"),
-                        err -> Assertions.fail("Failed"));
+                .blockingAwait();
 
     }
 
@@ -62,7 +65,11 @@ public class EventReceiverTest {
     }
 
     private Completable checkMessage(JsonObject message) {
-        return Completable.fromAction(() -> cache.getAsync(message.getJsonObject("user").getString("id")));
+        return Completable.timer(5, TimeUnit.SECONDS).doOnComplete(() -> {
+            User user = cache.get(message.getJsonObject("user").getString("id"));
+            assertNotNull(user);
+        });
+
     }
 
 

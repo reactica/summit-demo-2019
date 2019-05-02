@@ -53,7 +53,7 @@ public class EventReceiver {
     public void start() {
 
         bridgeStarted = Future.future();
-        vertx.eventBus().<JsonObject>consumer(Event.USER_IN_LINE,message -> {
+        vertx.eventBus().<JsonObject>localConsumer(Event.USER_IN_LINE,message -> {
             JsonObject userEventJson = message.body();
 
             userEventJson.remove("eventType");
@@ -68,7 +68,7 @@ public class EventReceiver {
             cache.putAsync(user.getId(),user);
 
         });
-        vertx.eventBus().<JsonObject>consumer(Event.USER_ON_RIDE,message -> {
+        vertx.eventBus().<JsonObject>localConsumer(Event.USER_ON_RIDE,message -> {
             JsonObject userEventJson = message.body();
             userEventJson.remove("eventType");
             userEventJson.remove("queueName");
@@ -80,7 +80,7 @@ public class EventReceiver {
             cache.putAsync(user.getId(),user);
         });
 
-        vertx.eventBus().<JsonObject>consumer(Event.USER_COMPLETED,message -> {
+        vertx.eventBus().<JsonObject>localConsumer(Event.USER_COMPLETED,message -> {
             JsonObject userEventJson = message.body();
             userEventJson.remove("eventType");
             userEventJson.remove("queueName");
@@ -92,7 +92,7 @@ public class EventReceiver {
             cache.putAsync(user.getId(),user);
         });
 
-        vertx.eventBus().<JsonObject>consumer(Event.USER_LEAVING,message -> {
+        vertx.eventBus().<JsonObject>localConsumer(Event.USER_LEAVING,message -> {
             JsonObject userEventJson = message.body();
             userEventJson.remove("eventType");
             userEventJson.remove("queueName");
