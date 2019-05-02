@@ -113,13 +113,21 @@ public class EventReceiver {
 
 
     private Completable deployAMQPVerticle() {
-        AmqpToEventBus user_queue = new AmqpToEventBus();
-        user_queue.setAddress(Event.USER_IN_LINE);
-        user_queue.setQueue(Event.USER_IN_LINE);
+        AmqpToEventBus user_in_line_bridge = new AmqpToEventBus();
+        user_in_line_bridge.setAddress(Event.USER_IN_LINE);
+        user_in_line_bridge.setQueue(Event.USER_IN_LINE);
 
-        AmqpToEventBus ride_event_queue = new AmqpToEventBus();
-        ride_event_queue.setAddress(Event.USER_ON_RIDE);
-        ride_event_queue.setQueue(Event.USER_ON_RIDE);
+        AmqpToEventBus user_on_ride_bridge = new AmqpToEventBus();
+        user_on_ride_bridge.setAddress(Event.USER_ON_RIDE);
+        user_on_ride_bridge.setQueue(Event.USER_ON_RIDE);
+
+        AmqpToEventBus user_completed_ride_bridge = new AmqpToEventBus();
+        user_completed_ride_bridge.setAddress(Event.USER_COMPLETED);
+        user_completed_ride_bridge.setQueue(Event.USER_COMPLETED);
+
+        AmqpToEventBus user_leaving_ride_bridge = new AmqpToEventBus();
+        user_leaving_ride_bridge.setAddress(Event.USER_LEAVING);
+        user_leaving_ride_bridge.setQueue(Event.USER_LEAVING);
 
         AmqpConfiguration configuration = new AmqpConfiguration()
                 .setContainer("amqp-examples")
@@ -127,8 +135,10 @@ public class EventReceiver {
                 .setPort(port.orElse(5672))
                 .setUser(user.orElse("user"))
                 .setPassword(password.orElse("user123"))
-                .addAmqpToEventBus(user_queue)
-                .addAmqpToEventBus(ride_event_queue);
+                .addAmqpToEventBus(user_leaving_ride_bridge)
+                .addAmqpToEventBus(user_completed_ride_bridge)
+                .addAmqpToEventBus(user_on_ride_bridge)
+                .addAmqpToEventBus(user_in_line_bridge);
 
         return vertx.rxDeployVerticle(AmqpVerticle.class.getName(), new DeploymentOptions().setConfig(JsonObject.mapFrom(configuration))).ignoreElement();
     }
