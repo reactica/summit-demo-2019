@@ -1,5 +1,5 @@
 import React from 'react';
-import {HashRouter, NavLink} from "react-router-dom";
+import {HashRouter} from "react-router-dom";
 import Websocket from 'react-websocket';
 
 
@@ -25,7 +25,7 @@ class Queue extends React.Component {
         this.updateUser(result.user);
       } else if(result.action === "remove") {
         this.removeUser(result.user);
-      } else if(result.action === "add") {
+      } else if(result.action === "new") {
         this.addUser(result.user);
       }
     }
@@ -42,44 +42,41 @@ class Queue extends React.Component {
       return obj.id !== user.id
     });
     this.setState({ users: data });
+    this.forceUpdate();
   }
 
   updateUser(user) {
     let data = this.state.users;
-    this.state.users.some(function (obj) {
-      if (obj.id === user.id) {
-        //change the value here
-        obj.status = user.status;
-        return true;    //breaks out of he loop
-      }
-    });
+    data.map(function(item) { return item.id === user.id ? user: item });
     this.setState({ users: data });
-    return data;
+    this.forceUpdate();
   }
 
   renderRow(user) {
     return (
-        <tr>
-          <th scope="row">{ user.id }</th>
+        <tr key={user.id.toString()}>
           <td>{ user.name }</td>
           <td>{ user.rideId }</td>
-          <td>{ user.status }</td>
+          <td>{ user.currentState }</td>
+          <td>{ user.enterQueueTime }</td>
         </tr>
     );
   }
 
 
   render() {
+    let wsUrl="ws://localhost:8081/queue-line-update/" + this.props.rideId;
+    console.log("Opening WebSocket to " + wsUrl);
     return (
         <HashRouter>
-          <Websocket url={'ws://localhost:8080/queue-line-update/' + this.props.rideId}
+          <Websocket url={'ws://localhost:8081/queue-line-update/' + this.props.rideId}
                      onMessage={this.onMessage.bind(this)}/>
           <table className="table table-striped table-bordered">
             <thead className="thead-dark">
             <tr>
-              <th scope="col">#</th>
               <th scope="col">Name</th>
               <th scope="col">Ride</th>
+              <th scope="col">State</th>
               <th scope="col">Time in Queue</th>
             </tr>
             </thead>

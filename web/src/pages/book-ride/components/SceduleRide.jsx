@@ -38,7 +38,7 @@ class ScheduleRide extends Component {
                 <a className="dropdown-item" onClick={this.setHorrorHouse}>Horror house</a>
               </div>
             </div>
-            { this.state.selectedRide == 1 &&
+            { this.state.selectedRide === 1 &&
             <div className="form-group">
               <label htmlFor="bookARideWithName">Name</label>
               <input type="text" className="form-control" id="bookARideWithName"
@@ -46,7 +46,7 @@ class ScheduleRide extends Component {
               <button type="submit" className="btn btn-secondary" style={{ marginTop: "5px" }}>Book Roller Coaster</button>
             </div>
             }
-            { this.state.selectedRide == 2 &&
+            { this.state.selectedRide === 2 &&
             <span style={{ color: "#FF0000", fontWeight: "bold"}}>Not implemented yet!</span>
             }
           </div>

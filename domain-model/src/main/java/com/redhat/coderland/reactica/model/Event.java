@@ -12,9 +12,14 @@ public abstract class Event {
     public static final String USER_ON_RIDE = "user-on-ride";
 
     /**
-     * User leaving the ride (ride completed)
+     * User has completed the ride (ride completed)
      */
     public static final String USER_COMPLETED = "user-ride-completed";
+
+    /**
+     * User leaving the ride
+     */
+    public static final String USER_LEAVING = "user-ride-leaving";
 
     /**
      * A ride just started.
@@ -27,7 +32,7 @@ public abstract class Event {
     public static final String RIDE_COMPLETED = "ride-completed";
 
 
-    public enum EventType {USER_IN_LINE,USER_ON_RIDE,USER_COMPLETED_RIDE, RIDE_STARTED, RIDE_COMPLETED }
+    public enum EventType {USER_IN_LINE,USER_ON_RIDE,USER_COMPLETED_RIDE, RIDE_STARTED, RIDE_COMPLETED, USER_LEAVING_RIDE}
 
     public abstract EventType getEventType();
 

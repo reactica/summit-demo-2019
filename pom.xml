@@ -15,8 +15,9 @@
     <module>domain-model</module>
     <module>amqp-bridge</module>
     <module>queue-line-service</module>
-    <module>event-generator</module>
-    <module>event-store</module>
+    <module>event-generator-service</module>
+    <module>event-store-service</module>
+      <module>datagrid-test</module>
   </modules>
 
 

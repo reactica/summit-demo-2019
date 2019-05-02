@@ -11,7 +11,7 @@ class Card extends React.Component {
 
   renderImage() {
     if(!!this.props.image) {
-      return (<img className="card-img-top" src={ "./img/" + this.props.image} alt="Card image cap"/>);
+      return (<img className="card-img-top" src={ "./img/" + this.props.image} alt="attraction"/>);
     }
   }
   render() {

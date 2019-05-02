@@ -1,4 +1,4 @@
-package com.redhat.reactica.qls;
+package com.redhat.coderland.datagridtest;
 
 import com.redhat.coderland.reactica.model.User;
 import org.infinispan.protostream.MessageMarshaller;

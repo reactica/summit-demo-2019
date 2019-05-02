@@ -1,13 +1,13 @@
 import React, {Component} from 'react';
 import Queue from './components/Queue'
 
-const rideOneName = "Roller Coaster";
-const rideTwoName = "Horror House";
+const rideRollerCoasterName = "Roller Coaster";
+const rideScreamerName = "Screamer";
 
 class MonitorRide extends Component {
   constructor(props) {
     super(props);
-    this.state = {selectedRide: 1, selectedRideName: rideOneName};
+    this.state = {selectedRide: 'roller-coaster', selectedRideName: rideRollerCoasterName};
 
     // This binding is necessary to make `this` work in the callback
     this.setRide = this.setRide.bind(this);
@@ -16,11 +16,11 @@ class MonitorRide extends Component {
   setRide(id) {
     let name="";
     switch (id) {
-      case 1 :
-        name=rideOneName;
+      case "roller-coaster" :
+        name=rideRollerCoasterName;
         break;
-      case 2 :
-        name=rideTwoName;
+      case "screamer" :
+        name=rideScreamerName;
         break;
       default :
         name="Unknown";
@@ -42,8 +42,8 @@ class MonitorRide extends Component {
                         aria-haspopup="true" aria-expanded="false"> {this.state.selectedRideName}
                 </button>
                 <div className="dropdown-menu">
-                  <a className="dropdown-item" onClick={() => this.setRide(1)}>Roller Coaster</a>
-                  <a className="dropdown-item" onClick={() => this.setRide(2)}>Horror house</a>
+                  <a className="dropdown-item" onClick={() => this.setRide("roller-coaster")}>Roller Coaster</a>
+                  <a className="dropdown-item" onClick={() => this.setRide("screamer")}>Screamer</a>
                 </div>
               </h3>
             </div>

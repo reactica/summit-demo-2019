@@ -14,7 +14,7 @@ public class User {
 
   private String id;
   private String name;
-  private String rideId = RIDE_ID;
+  private String rideId;
   private String currentState;
   private long enterQueueTime; //Time in seconds since beginning of Epoch in UTC
   private long completedRideTime; //Time in seconds since beginning of Epoch in UTC
