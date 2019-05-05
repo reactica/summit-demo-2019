@@ -4,17 +4,18 @@ import com.redhat.coderland.bridge.AmqpConfiguration;
 import com.redhat.coderland.bridge.AmqpVerticle;
 import com.redhat.coderland.bridge.EventBusToAmqp;
 import com.redhat.coderland.reactica.model.Event;
+import com.redhat.coderland.reactica.model.RideStartedEvent;
 import com.redhat.coderland.reactica.model.User;
+import com.redhat.coderland.reactica.model.UserInLineEvent;
 import io.quarkus.test.junit.QuarkusTest;
 import io.reactivex.Completable;
-import io.reactivex.Single;
+import io.reactivex.CompletableSource;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.CompletableHelper;
 import io.vertx.reactivex.core.Vertx;
 import org.infinispan.client.hotrod.RemoteCache;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,25 +48,47 @@ public class EventReceiverTest {
     public void testUserSimulation() throws Exception {
 
         testDone = Future.future();
-        Event randomUserInLineEvent = eventHelper.createRandomUserInLineEvent();
-        JsonObject message = JsonObject.mapFrom(randomUserInLineEvent);
+        UserInLineEvent randomUserInLineEvent = eventHelper.createRandomUserInLineEvent();
+        RideStartedEvent randomRideStartedEvent = eventHelper.createRandomRideStartedEvent();
+        randomRideStartedEvent.getRide().setAttractionId(randomUserInLineEvent.getUser().getRideId());
         deployAMQPVerticle()
-                .andThen(sendMessage(message))
-                .andThen(checkMessage(message))
+                .andThen(sendNewUserInLine(JsonObject.mapFrom(randomUserInLineEvent)))
+                .andThen(checkThatUserWasCreated(JsonObject.mapFrom(randomUserInLineEvent)))
+                .andThen(sendRideStartedEvent(JsonObject.mapFrom(randomRideStartedEvent)))
+                .andThen(checkThatRideHasUpdatedTheUser(JsonObject.mapFrom(randomUserInLineEvent)))
                 .blockingAwait();
 
     }
 
-    private Completable sendMessage(JsonObject message) {
+    private CompletableSource checkThatRideHasUpdatedTheUser(JsonObject message) {
+        return Completable.timer(5, TimeUnit.SECONDS).doOnComplete(() -> {
+            String userid = message.getJsonObject("user").getString("id");
+            LOGGER.info("Trying to get user with id {}",userid);
+            User user = cache.get(userid);
+            assertNotNull(user);
+            assertEquals(User.STATE_ON_RIDE,user.getCurrentState());
+        });
+    }
+
+    private CompletableSource sendRideStartedEvent(JsonObject message) {
         return Completable.fromAction(() -> {
-            LOGGER.info("> TEST: sending event to the test buss\n {}",message.encodePrettily());
-            vertx.eventBus().send("test", message);
+            LOGGER.info("> TEST: sending ride started event to the test-ride-event buss\n {}",message.encodePrettily());
+            vertx.eventBus().send("test-ride-event",message);
+        });
+    }
+
+    private Completable sendNewUserInLine(JsonObject message) {
+        return Completable.fromAction(() -> {
+            LOGGER.info("> TEST: sending event to the test-user-event buss\n {}",message.encodePrettily());
+            vertx.eventBus().send("test-user-event", message);
         });
 
     }
 
-    private Completable checkMessage(JsonObject message) {
+    private Completable checkThatUserWasCreated(JsonObject message) {
         return Completable.timer(5, TimeUnit.SECONDS).doOnComplete(() -> {
+            String userid = message.getJsonObject("user").getString("id");
+            LOGGER.info("Trying to get user with id {}",userid);
             User user = cache.get(message.getJsonObject("user").getString("id"));
             assertNotNull(user);
         });
@@ -75,8 +98,12 @@ public class EventReceiverTest {
 
     private Completable deployAMQPVerticle() {
         EventBusToAmqp user_queue = new EventBusToAmqp();
-        user_queue.setAddress("test");
+        user_queue.setAddress("test-user-event");
         user_queue.setQueue(Event.USER_IN_LINE);
+
+        EventBusToAmqp ride_queue = new EventBusToAmqp();
+        ride_queue.setAddress("test-ride-event");
+        ride_queue.setQueue(Event.RIDE_STARTED);
 
         AmqpConfiguration configuration = new AmqpConfiguration()
                 .setContainer("amqp-examples")
@@ -84,7 +111,8 @@ public class EventReceiverTest {
                 .setPort(5672)
                 .setUser("user")
                 .setPassword("user123")
-                .addEventBusToAmqp(user_queue);
+                .addEventBusToAmqp(user_queue)
+                .addEventBusToAmqp(ride_queue);
 
         return vertx.rxDeployVerticle(AmqpVerticle.class.getName(), new DeploymentOptions().setConfig(JsonObject.mapFrom(configuration))).ignoreElement();
     }

@@ -5,6 +5,8 @@ import com.redhat.coderland.bridge.AmqpConfiguration;
 import com.redhat.coderland.bridge.AmqpVerticle;
 import com.redhat.coderland.bridge.EventBusToAmqp;
 import com.redhat.coderland.reactica.model.Event;
+import com.redhat.coderland.reactica.model.RideCompletedEvent;
+import com.redhat.coderland.reactica.model.RideStartedEvent;
 import com.redhat.coderland.reactica.model.User;
 import io.quarkus.scheduler.Scheduled;
 import io.reactivex.Completable;
@@ -25,15 +27,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 
 @ApplicationScoped
-public class UserSimulator {
+public class RideSimulator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserSimulator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RideSimulator.class);
 
 
     @Inject @ConfigProperty(name = "bridge.amqp.host")
@@ -64,16 +65,21 @@ public class UserSimulator {
     @Inject
     EventHelper eventHelper;
 
-    private boolean isBridgeStarted = false;
+    boolean isBridgeStarted = false;
 
 
-    @Scheduled(every = "{coderland.config.generateevent.user.interval}")
-    public void genereteNewUsers() {
+
+    @Scheduled(every = "{coderland.config.generateevent.ride.interval}")
+    public void generateRideEvent() {
         if(isBridgeStarted) {
-            Event event = eventHelper.createRandomUserInLineEvent();
-            vertx.eventBus().send(event.getQueueName(), JsonObject.mapFrom(event));
+                RideStartedEvent rideStartedEvent = eventHelper.createRandomRideStartedEvent();
+                vertx.eventBus().send(Event.RIDE_STARTED,JsonObject.mapFrom(rideStartedEvent));
+                vertx.setTimer(rideStartedEvent.getRideTime()*1000, t -> {
+                    RideCompletedEvent rideCompletedEvent = eventHelper.createRideCompletedEvent(rideStartedEvent.getRide());
+                    vertx.eventBus().send(Event.RIDE_COMPLETED,JsonObject.mapFrom(rideCompletedEvent));
+                });
         } else {
-            LOGGER.info("Skipping creating event since the bridge isn't started yet");
+            LOGGER.info("Bridge not started yet. Skipping a schedule");
         }
     }
 
@@ -87,11 +93,14 @@ public class UserSimulator {
     }
 
 
-
     private Completable deployAMQPVerticle() {
-        EventBusToAmqp user_queue = new EventBusToAmqp();
-        user_queue.setAddress(Event.USER_IN_LINE);
-        user_queue.setQueue(Event.USER_IN_LINE);
+        EventBusToAmqp ride_started_events = new EventBusToAmqp();
+        ride_started_events.setAddress(Event.RIDE_STARTED);
+        ride_started_events.setQueue(Event.RIDE_STARTED);
+
+        EventBusToAmqp ride_completed_events = new EventBusToAmqp();
+        ride_completed_events.setAddress(Event.RIDE_COMPLETED);
+        ride_completed_events.setQueue(Event.RIDE_COMPLETED);
 
 
         AmqpConfiguration configuration = new AmqpConfiguration()
@@ -100,7 +109,8 @@ public class UserSimulator {
                 .setPort(port.orElse(5672))
                 .setUser(user.orElse("user"))
                 .setPassword(password.orElse("user123"))
-                .addEventBusToAmqp(user_queue);
+                .addEventBusToAmqp(ride_started_events)
+                .addEventBusToAmqp(ride_completed_events);
 
         return vertx.rxDeployVerticle(AmqpVerticle.class.getName(), new DeploymentOptions().setConfig(JsonObject.mapFrom(configuration))).ignoreElement();
     }

@@ -1,9 +1,6 @@
 package com.redhat.coderland.eventstore;
 
-import com.redhat.coderland.reactica.model.Event;
-import com.redhat.coderland.reactica.model.Ride;
-import com.redhat.coderland.reactica.model.User;
-import com.redhat.coderland.reactica.model.UserInLineEvent;
+import com.redhat.coderland.reactica.model.*;
 import io.vertx.core.json.JsonObject;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,17 +28,23 @@ public class EventHelper {
     return json;
   }
 
-  public Event createRandomUserInLineEvent() {
+  public UserInLineEvent createRandomUserInLineEvent() {
     String userName = cuteNameService.generate();
     String id = UUID.randomUUID().toString();
     User user = new User(id,userName);
-    Ride ride = randomRideService.getRandomRide();
-    return new UserInLineEvent(user,ride);
+    user.setRideId(randomRideService.getRandomRideId());
+    return new UserInLineEvent(user);
 
   }
 
-  public static JsonObject createRideEvent(String event, User user) {
-    return create(event, user, null);
+  public RideStartedEvent createRandomRideStartedEvent() {
+    Ride ride = new Ride();
+    ride.setAttractionId(randomRideService.getRandomRideId());
+    return new RideStartedEvent(ride,randomRideService.getRandomRideTime(),randomRideService.getCapacity());
+  }
+
+  public RideCompletedEvent createRideCompletedEvent(Ride ride) {
+    return new RideCompletedEvent(ride,randomRideService.getRandomLeaveTime());
   }
 
 }

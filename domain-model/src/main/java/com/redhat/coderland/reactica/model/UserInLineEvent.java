@@ -4,15 +4,12 @@ public class UserInLineEvent extends Event {
 
     private static final EventType eventType = EventType.USER_IN_LINE;
     private User user;
-    private Ride ride;
-
 
     public UserInLineEvent() {
     }
 
-    public UserInLineEvent(User user, Ride ride) {
+    public UserInLineEvent(User user) {
         this.user = user;
-        this.ride = ride;
     }
 
     public User getUser() {
@@ -23,13 +20,6 @@ public class UserInLineEvent extends Event {
         this.user = user;
     }
 
-    public Ride getRide() {
-        return ride;
-    }
-
-    public void setRide(Ride ride) {
-        this.ride = ride;
-    }
 
     @Override
     public EventType getEventType() {

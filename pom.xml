@@ -17,7 +17,6 @@
     <module>queue-line-service</module>
     <module>event-generator-service</module>
     <module>event-store-service</module>
-      <module>datagrid-test</module>
   </modules>
 
 

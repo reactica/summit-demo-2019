@@ -32,16 +32,18 @@ public class EventHelper {
     String userName = cuteNameService.generate();
     String id = UUID.randomUUID().toString();
     User user = new User(id,userName);
-    Ride ride = randomRideService.getRandomRide();
-    return new UserInLineEvent(user,ride);
+    user.setRideId(randomRideService.getRandomRideId());
+    return new UserInLineEvent(user);
   }
 
-  public Event createUserOnRollerCoasterEvent(User user) {
-    return new UserOnRideEvent(user);
+  public RideStartedEvent createRandomRideStartedEvent() {
+    Ride ride = new Ride();
+    ride.setAttractionId(randomRideService.getRandomRideId());
+    return new RideStartedEvent(ride,randomRideService.getRandomRideTime(),randomRideService.getCapacity());
   }
 
-  public static JsonObject createRideEvent(String event, User user) {
-    return create(event, user, null);
+  public RideCompletedEvent createRideCompletedEvent(Ride ride) {
+    return new RideCompletedEvent(ride,randomRideService.getRandomLeaveTime());
   }
 
 }
