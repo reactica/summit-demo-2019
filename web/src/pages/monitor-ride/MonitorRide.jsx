@@ -36,22 +36,13 @@ class MonitorRide extends Component {
         <div>
           <div className="top-banner"/>
           <div className="row justify-content-center">
-            <div className="col-lg-8 col-sm-12">
-              <h3>User Queue for &nbsp;
-                <button className="btn btn-primary dropdown-toggle mr-4" type="button" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false"> {this.state.selectedRideName}
-                </button>
-                <div className="dropdown-menu">
-                  <a className="dropdown-item" onClick={() => this.setRide("roller-coaster")}>Roller Coaster</a>
-                  <a className="dropdown-item" onClick={() => this.setRide("screamer")}>Screamer</a>
-                </div>
-              </h3>
+            <div className="col-lg-4">
+              <h3>User Queue for Roller Coaster</h3>
+              <Queue rideId="roller-coaster" rideName="Roller Coaster"/>
             </div>
-          </div>
-
-          <div className="row justify-content-center">
-            <div className="col-lg-8 col-sm-12">
-              <Queue rideId={this.state.selectedRide} rideName={this.state.selectedRideName}/>
+            <div className="col-lg-4">
+              <h3>User Queue for Screamer</h3>
+              <Queue rideId="screamer" rideName="Screamer"/>
             </div>
           </div>
         </div>

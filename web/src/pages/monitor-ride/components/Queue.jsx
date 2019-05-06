@@ -69,6 +69,7 @@ class Queue extends React.Component {
   addUser(user) {
     let data = this.state.users;
     data.push(user);
+    data.sort((a,b) => ((a.enterQueueTime < b.enterQueueTime) ? -1 : ((b.enterQueueTime < a.enterQueueTime) ? 1 : 0)));
     this.setState({ users: data });
   }
 
@@ -76,6 +77,7 @@ class Queue extends React.Component {
     let data = this.state.users.filter(function (item) {
       return item.id !== user.id
     });
+    data.sort((a,b) => ((a.enterQueueTime < b.enterQueueTime) ? -1 : ((b.enterQueueTime < a.enterQueueTime) ? 1 : 0)));
     this.setState({ users: data });
   }
 
@@ -83,6 +85,7 @@ class Queue extends React.Component {
     let data = this.state.users;
     let item = data.find(value => { return value.id === user.id });
     item.currentState = user.currentState;
+    data.sort((a,b) => ((a.enterQueueTime < b.enterQueueTime) ? -1 : ((b.enterQueueTime < a.enterQueueTime) ? 1 : 0)));
     this.setState({ users: data });
   }
 

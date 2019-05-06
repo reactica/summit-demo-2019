@@ -1,5 +1,6 @@
 package com.redhat.coderland.reactica.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public class Ride {
 
   private String rideId = UUID.randomUUID().toString();
   private String attractionId;
-  private List<User> userOnTheRide;
+  private List<User> userOnTheRide = new ArrayList<User>();
 
   private State state = State.UNKNOWN;
 
