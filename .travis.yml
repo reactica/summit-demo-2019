@@ -14,20 +14,41 @@ jdk:
 cache:
   directories:
     - $HOME/.m2
+    - $GRAALVM_HOME
 
 services:
   - docker
 
 before_install:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS quay.io
-  - curl -L https://github.com/oracle/graal/releases/download/vm-1.0.0-rc16/graalvm-ce-1.0.0-rc16-linux-amd64.tar.gz | tar xz -C $HOME/
+  - test -d $GRAALVM_HOME || curl -L https://github.com/oracle/graal/releases/download/vm-1.0.0-rc16/graalvm-ce-1.0.0-rc16-linux-amd64.tar.gz | tar xz -C $HOME/
 
 script:
   - mvn clean package -Pnative -DskipTests || exit
   - pushd event-store-service
   - docker build -f src/main/docker/Dockerfile.native -t tqvarnst/coderland-event-store .
+  - popd
+  - pushd queue-line-calculator
+  - docker build -f src/main/docker/Dockerfile.native -t tqvarnst/coderland-qlc .
+  - popd
+  - pushd queue-line-service
+  - docker build -f src/main/docker/Dockerfile.native -t tqvarnst/coderland-qls .
+  - popd
+  - pushd ride-event-generator-service
+  - docker build -f src/main/docker/Dockerfile.native -t tqvarnst/coderland-ride-event-gen .
+  - popd
+  - pushd ride-event-generator-service
+  - docker build -f src/main/docker/Dockerfile.native -t tqvarnst/coderland-user-event-gen .
+  - popd
 
 after_success:
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker tag tqvarnst/coderland-event-store:$TRAVIS_COMMIT quay.io/tqvarnst/coderland-event-store:$TAG
-  - docker push quay.io/tqvarnst/coderland-event-store:$TAG
+  - docker tag tqvarnst/coderland-event-store:latest quay.io/tqvarnst/coderland-event-store:latest
+  - docker push quay.io/tqvarnst/coderland-event-store:latest
+  - docker tag tqvarnst/coderland-qlc:latest quay.io/tqvarnst/coderland-qlc:latest
+  - docker push quay.io/tqvarnst/coderland-qlc:latest
+  - docker tag tqvarnst/coderland-qls:latest quay.io/tqvarnst/coderland-qls:latest
+  - docker push quay.io/tqvarnst/coderland-qls:latest
+  - docker tag tqvarnst/coderland-ride-event-gen:latest quay.io/tqvarnst/coderland-ride-event-gen:latest
+  - docker push quay.io/tqvarnst/coderland-ride-event-gen:latest
+  - docker tag tqvarnst/coderland-user-event-gen:latest quay.io/tqvarnst/coderland-user-event-gen:latest
+  - docker push quay.io/tqvarnst/coderland-user-event-gen:latest
