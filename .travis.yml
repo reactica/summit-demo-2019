@@ -25,7 +25,7 @@ before_install:
 
 script:
   - mvn clean package -Pnative -DskipTests || exit
-  - docker build -f event-stor-service/src/main/docker/Dockerfile.native -t tqvarnst/coderland-event-store .
+  - docker build -f event-store-service/src/main/docker/Dockerfile.native -t tqvarnst/coderland-event-store .
 
 after_success:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
