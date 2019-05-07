@@ -23,6 +23,8 @@
 
 
   <properties>
+    <reactica-version>0.1-SNAPSHOT</reactica-version>
+    <quarkus.version>0.14.0</quarkus.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -38,9 +40,19 @@
     <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
     <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
     <quarkus.version>0.14.0</quarkus.version>
-
-
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-bom</artifactId>
+        <version>${quarkus.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <defaultGoal>clean install</defaultGoal>

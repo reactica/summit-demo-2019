@@ -68,8 +68,8 @@ public class QueueUpdateServiceTestCase {
     Thread.sleep(1000);
     MESSAGES.clear(); //Clear out old values
 
-
-    try (Session session = ContainerProvider.getWebSocketContainer().connectToServer(Client.class, uri)) {
+    Session session = ContainerProvider.getWebSocketContainer().connectToServer(Client.class, uri);
+    try {
 
       //Test adding a user
       cache.put(user1.getId(), user1);
@@ -98,6 +98,8 @@ public class QueueUpdateServiceTestCase {
 
 
       cache.removeAsync(user.getId());
+      cache.removeAsync(user2.getId());
+    } finally {
       session.close();
     }
   }

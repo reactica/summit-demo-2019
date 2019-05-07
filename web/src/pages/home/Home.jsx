@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Card from '../../common-components/Card';
+import AttractionCard from '../../common-components/AttractionCard';
 
 class Home extends Component {
   render() {
@@ -8,10 +9,11 @@ class Home extends Component {
         <div className="top-banner"/>
         <div className="row justify-content-center">
           <div className="col-lg-3 col-sm-5 text-center">
-            <Card title="Reactica roller coster"
+            <AttractionCard title="Reactica roller coster"
                   description="The most amazing roller coaster in the Reactica team park. It's bigger, better and more reactive than all other rides!"
                   image="reactica-rollercoster.jpg"
-                  showButton={true}/>
+                  showButton={true}
+                  qlc_address="ws://localhost:8085/queue-line-calculator/roller-coaster"/>
           </div>
           <div className="col-lg-3 col-sm-5 text-center">
             <Card title="Reactica horror house"
