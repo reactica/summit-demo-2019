@@ -20,12 +20,12 @@ services:
 
 before_install:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS quay.io
-  - curl -LO https://github.com/oracle/graal/releases/download/vm-1.0.0-rc16/graalvm-ce-1.0.0-rc16-linux-amd64.tar.gz
-  - tar -zxvf graalvm-ce-1.0.0-rc16-linux-amd64.tar.gz -C $HOME/
+  - curl -L https://github.com/oracle/graal/releases/download/vm-1.0.0-rc16/graalvm-ce-1.0.0-rc16-linux-amd64.tar.gz | tar xz -C $HOME/
 
 script:
   - mvn clean package -Pnative -DskipTests || exit
-  - docker build -f event-store-service/src/main/docker/Dockerfile.native -t tqvarnst/coderland-event-store .
+  - pushd event-store-service
+  - docker build -f src/main/docker/Dockerfile.native -t tqvarnst/coderland-event-store .
 
 after_success:
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
